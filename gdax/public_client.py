@@ -1,39 +1,42 @@
 #
-# GDAX/PublicClient.py
+# GDAX_Custom/PublicClient.py
 # Daniel Paquin
 #
-# For public requests to the GDAX exchange
+# For public requests to the GDAX_Custom exchange
 
-import requests
+import json, pprint
+from geventhttpclient import HTTPClient, URL
 
 
 class PublicClient(object):
-    """GDAX public client API.
+    """GDAX_Custom public client API.
 
     All requests default to the `product_id` specified at object
     creation if not otherwise specified.
 
     Attributes:
-        url (Optional[str]): API URL. Defaults to GDAX API.
+        url (Optional[str]): API URL. Defaults to GDAX_Custom API.
 
     """
 
-    def __init__(self, api_url='https://api.gdax.com', timeout=30):
-        """Create GDAX API public client.
+    def __init__(self, api_url='https://api.gdax.com'):
+        """Create GDAX_Custom API public client.
 
         Args:
-            api_url (Optional[str]): API URL. Defaults to GDAX API.
+            api_url (Optional[str]): API URL. Defaults to GDAX_Custom API.
 
         """
-        self.url = api_url.rstrip('/')
-        self.timeout = timeout
+        self.url = URL(api_url)
+        self.http = HTTPClient.from_url(self.url)
 
     def _get(self, path, params=None):
         """Perform get request"""
-
-        r = requests.get(self.url + path, params=params, timeout=self.timeout)
+        url = URL(self.url.request_uri + path )
+        r = self.http.get(url.request_uri)
+        return json.load(r)
+        # r = requests.get(self.url + path, params=params, timeout=30)
         # r.raise_for_status()
-        return r.json()
+        # return r.json()
 
     def get_products(self):
         """Get a list of available currency pairs for trading.
